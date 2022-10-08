@@ -7,10 +7,14 @@
     "test": "cross-env TEST_CONTEXT=all jest --coverage --runInBand --no-cache --forceExit",
     "dev": "nodemon",
     "build": "tsc",
-    "start": "node dist/src/app/server.js"
+    "start": "node dist/src/apps/server.js"
   },
   "author": "Bruce Grover Lee",
   "license": "ISC",
+  "_moduleAliases": {
+    "@speeky/framework": "dist/src/framework",
+    "@speeky/framework/*": "dist/src/framework/*"
+  },
   "dependencies": {
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
@@ -18,6 +22,7 @@
     "express": "^4.18.1",
     "helmet": "^6.0.0",
     "joi": "^17.6.2",
+    "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
     "uuid": "^9.0.0",
     "uuid-validate": "^0.0.3",
