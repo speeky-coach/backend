@@ -7,10 +7,9 @@ none
 ## Dependencies
 
 - uuid
-- uuid-validate
 
 ```
-npm install uuid uuid-validate
+npm install uuid
 ```
 
 ## Environment Variables

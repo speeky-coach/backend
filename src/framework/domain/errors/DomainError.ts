@@ -1,10 +1,12 @@
 export enum DomainErrorTypes {
   NotFound = 'NOT_FOUND',
-  NotAcceptable = 'NOT_ACCEPTABLE',
+  BadUserInput = 'BAD_USER_INPUT',
 }
 
 abstract class DomainError extends Error {
-  abstract errorType: DomainErrorTypes;
+  abstract type: DomainErrorTypes;
+  abstract code: string;
+  // abstract message: string;
 }
 
 export default DomainError;

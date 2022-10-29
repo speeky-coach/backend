@@ -3,7 +3,11 @@ import { Request } from 'express';
 import logger from './winston';
 
 const stream: StreamOptions = {
-  write: (message) => logger.info(message),
+  write: (message) => {
+    const jumpLine = message.lastIndexOf('\n');
+
+    logger.info(message.substring(0, jumpLine));
+  },
 };
 
 function isGraphQLRequest(body: any): boolean {
@@ -47,7 +51,7 @@ const skip = (req: Request, res) => {
 };
 
 const morganMiddleware = morgan(
-  ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms :graphql',
+  ':remote-addr - :remote-user ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms :graphql',
   {
     stream,
     skip,

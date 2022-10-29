@@ -6,8 +6,10 @@ import NotAcceptableError from './errors/NotAcceptableError';
 import NotFoundError from './errors/NotFoundError';
 import UnauthorizedError from './errors/UnauthorizedError';
 import ExpressApp from './ExpressApp';
+import ExpressPresenter from './ExpressPresenter';
 import healthRouter from './healthRouter';
 import errorHandler, { ErrorBody } from './middlewares/errorHandler';
+import withErrorHandler from './decorators/withErrorHandler';
 import { AccessTokenPayload, AuthenticatedRequest, UserTokenPayload } from './types';
 import getListQuery from './validators/getListQuery';
 import validateBody from './validators/validateBody';
@@ -25,11 +27,13 @@ export {
   UnauthorizedError,
   ErrorBody,
   errorHandler,
+  withErrorHandler,
   getListQuery,
   validateBody,
   validateParams,
   validateQuery,
   ExpressApp,
+  ExpressPresenter,
   healthRouter,
   UserTokenPayload,
   AccessTokenPayload,
