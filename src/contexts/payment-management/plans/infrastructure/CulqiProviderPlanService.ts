@@ -1,13 +1,5 @@
-import axios from 'axios';
+import culqiClient from '../../../../setup/culqi';
 import ProviderPlanService, { CreateInput, UpdateInput } from '../domain/ProviderPlanService';
-
-const culqiClient = axios.create({
-  baseURL: process.env.CULQI_API_URL,
-  headers: {
-    'Content-type': 'application/json',
-    Authorization: 'Bearer ' + process.env.CULQI_API_PRIVATE_KEY,
-  },
-});
 
 const INTERVAL = 'meses';
 const INTERVAL_COUNT = 1;

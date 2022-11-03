@@ -1,4 +1,4 @@
-import Plan from '../domain/Plan';
+import Plan, { PlanId } from '../domain/Plan';
 import PlanRepository, { AddInput, UpdateInput } from '../domain/PlanRepository';
 import { firestoreDb } from '../../../../framework';
 
@@ -27,7 +27,7 @@ class FirestorePlanRepository implements PlanRepository {
     return newPlan;
   }
 
-  async getById(id: string): Promise<Plan | null> {
+  async getById(id: PlanId): Promise<Plan | null> {
     const doc = await firestoreDb.collection(COLLECTION_NAME).doc(id).get();
 
     if (!doc.exists) {
@@ -51,11 +51,11 @@ class FirestorePlanRepository implements PlanRepository {
     return plan;
   }
 
-  async updateById(id: string, input: UpdateInput): Promise<void> {
+  async updateById(id: PlanId, input: UpdateInput): Promise<void> {
     await firestoreDb.collection(COLLECTION_NAME).doc(id).set(input, { merge: true });
   }
 
-  async deleteById(id: string): Promise<void> {
+  async deleteById(id: PlanId): Promise<void> {
     await firestoreDb.collection(COLLECTION_NAME).doc(id).delete();
   }
 }
