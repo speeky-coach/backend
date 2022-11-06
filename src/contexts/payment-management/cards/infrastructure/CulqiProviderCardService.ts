@@ -1,7 +1,7 @@
 import culqiClient from '../../../../setup/culqi';
 import ProviderCardService, { CreateInput, ProviderCard } from '../domain/ProviderCardService';
 
-interface CulqiCard {
+export interface CulqiCard {
   object: 'card';
   id: string;
   date: number;

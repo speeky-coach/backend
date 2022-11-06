@@ -4,7 +4,7 @@ import ProviderPlanService, { CreateInput, UpdateInput } from '../domain/Provide
 const INTERVAL = 'meses';
 const INTERVAL_COUNT = 1;
 
-interface CulqiPlan {
+export interface CulqiPlan {
   object: 'plan';
   id: string;
   creation_date: number;

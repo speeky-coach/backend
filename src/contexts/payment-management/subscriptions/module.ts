@@ -1,4 +1,4 @@
-import router from './infrastructure/rest/router';
+import router from './presenter/router';
 
 export default {
   router,
