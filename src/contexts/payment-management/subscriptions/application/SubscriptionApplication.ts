@@ -43,16 +43,14 @@ class SubscriptionApplication {
 
     const providerSubscription = await this.providerSubscriptionService.create({ plan, card });
 
-    const subscription = SubscriptionFactory.create({
+    const subscriptionWithoutId = SubscriptionFactory.create({
       studentId,
       providerSubscription,
       plan,
       card,
     });
 
-    const { id } = await this.subscriptionRepository.add(subscription);
-
-    subscription.id = id;
+    const subscription = await this.subscriptionRepository.add(subscriptionWithoutId);
 
     await this.eventBus.publish(new SubscriptionCreated(subscription));
 

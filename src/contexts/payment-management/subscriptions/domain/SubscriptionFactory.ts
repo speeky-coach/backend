@@ -4,7 +4,6 @@ import { StudentId } from '../../student-billing-profiles/domain/Student';
 import { ProviderSubscription } from './ProviderSubscriptionService';
 import Subscription, { SubscriptionStatus } from './Subscription';
 
-const DEFAULT_SUBSCRIPTION_ID = 'NULL';
 const SUBSCRIPTION_CHARGE_INITIAlIZATION = 0;
 
 type CreateInput = {
@@ -15,11 +14,10 @@ type CreateInput = {
 };
 
 class SubscriptionFactory {
-  static create({ studentId, providerSubscription, plan, card }: CreateInput): Subscription {
+  static create({ studentId, providerSubscription, plan, card }: CreateInput): Omit<Subscription, 'id'> {
     const now = new Date();
 
-    const subscription: Subscription = {
-      id: DEFAULT_SUBSCRIPTION_ID,
+    const subscription: Omit<Subscription, 'id'> = {
       providerSubscriptionId: providerSubscription.id,
       studentId: studentId,
       planId: plan.id,

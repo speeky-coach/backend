@@ -5,7 +5,7 @@ import SubscriptionRepository from '../domain/SubscriptionRepository';
 const COLLECTION_NAME = 'subscriptions';
 
 class FirestoreSubscriptionRepository implements SubscriptionRepository {
-  public async add(subscription: Subscription): Promise<Subscription> {
+  public async add(subscription: Omit<Subscription, 'id'>): Promise<Subscription> {
     const response = await firestoreDb.collection(COLLECTION_NAME).add(subscription);
 
     const subscriptionWithId: Subscription = {
