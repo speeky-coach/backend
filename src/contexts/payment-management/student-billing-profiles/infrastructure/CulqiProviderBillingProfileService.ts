@@ -32,9 +32,9 @@ class CulqiProviderBillingProfileService implements ProviderBillingProfileServic
       first_name: input.name,
       last_name: input.lastname,
       email: input.email,
-      address: input.address,
-      address_city: input.city,
-      country_code: input.country,
+      address: input.address.street,
+      address_city: input.address.city,
+      country_code: input.address.country,
       phone_number: input.phone,
     };
 

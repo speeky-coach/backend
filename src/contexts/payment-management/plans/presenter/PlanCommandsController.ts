@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ExpressPresenter, withErrorHandler } from '../../../../framework';
-import planApplicationInteractor from '../application/planApplicationInteractor';
+import planApplicationInteractor from '../infrastructure/planApplicationInteractor';
 
 class PlanCommandsController {
   @withErrorHandler
@@ -15,7 +15,7 @@ class PlanCommandsController {
     presenter.returnNewEntity(plan);
   }
 
-  @withErrorHandler
+  /* @withErrorHandler
   static async update(request: Request, response: Response): Promise<void> {
     const { planId } = request.params;
     const { title, currency, price, trialDays } = request.body;
@@ -25,9 +25,9 @@ class PlanCommandsController {
     const presenter = new ExpressPresenter(response);
 
     presenter.returnOk();
-  }
+  } */
 
-  @withErrorHandler
+  /* @withErrorHandler
   static async delete(request: Request, response: Response): Promise<void> {
     const { planId } = request.params;
 
@@ -36,7 +36,7 @@ class PlanCommandsController {
     const presenter = new ExpressPresenter(response);
 
     presenter.returnOk();
-  }
+  } */
 }
 
 export default PlanCommandsController;

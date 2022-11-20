@@ -5,7 +5,7 @@ import StudentBillingProfile from '../domain/StudentBillingProfile';
 import StudentBillingProfileRepository from '../domain/StudentBillingProfileRepository';
 import StudentService from '../domain/StudentService';
 
-type CreateInput = Pick<StudentBillingProfile, 'studentId' | 'address' | 'city' | 'country' | 'phone'>;
+type CreateInput = Pick<StudentBillingProfile, 'studentId' | 'identityDocument' | 'address' | 'phone'>;
 
 class StudentBillingProfileApplication {
   constructor(
@@ -14,7 +14,7 @@ class StudentBillingProfileApplication {
     private providerBillingProfileService: ProviderBillingProfileService,
   ) {}
 
-  async create({ studentId, address, city, country, phone }: CreateInput): Promise<StudentBillingProfile> {
+  async create({ studentId, identityDocument, address, phone }: CreateInput): Promise<StudentBillingProfile> {
     const student = await this.studentService.getById(studentId);
 
     if (!student) {
@@ -31,9 +31,8 @@ class StudentBillingProfileApplication {
       name: student.name,
       lastname: student.lastname,
       email: student.email,
+      identityDocument,
       address,
-      city,
-      country,
       phone,
     };
 
@@ -42,9 +41,8 @@ class StudentBillingProfileApplication {
     const studentBillingProfileInput = {
       studentId,
       providerBillingProfileId: providerBillingProfile.id,
+      identityDocument,
       address,
-      city,
-      country,
       phone,
     };
 

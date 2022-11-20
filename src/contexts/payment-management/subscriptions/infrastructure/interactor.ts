@@ -1,6 +1,6 @@
 import { syncEventBus } from '../../../../framework';
 import SubscriptionApplication from '../application/SubscriptionApplication';
-import { culqiProviderSubscriptionService } from './CulqiProviderSubscriptionService';
+import { mercadoPagoProviderSubscriptionService } from './MercadoPagoProviderSubscriptionService';
 import { firestoreCardService } from './FirestoreCardService';
 import { firestorePlanService } from './FirestorePlanService';
 import { firestoreSubscriptionRepository } from './FirestoreSubscriptionRepository';
@@ -8,7 +8,7 @@ import { firestoreSubscriptionRepository } from './FirestoreSubscriptionReposito
 const interactor = new SubscriptionApplication(
   firestorePlanService,
   firestoreCardService,
-  culqiProviderSubscriptionService,
+  mercadoPagoProviderSubscriptionService,
   firestoreSubscriptionRepository,
   syncEventBus,
 );

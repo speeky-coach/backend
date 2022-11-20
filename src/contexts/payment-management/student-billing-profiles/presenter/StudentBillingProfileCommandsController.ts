@@ -1,17 +1,16 @@
 import { Request, Response } from 'express';
 import { ExpressPresenter, withErrorHandler } from '../../../../framework';
-import studentBillingProfileApplicationInteractor from '../application/studentBillingProfileApplicationInteractor';
+import studentBillingProfileApplicationInteractor from '../infrastructure/studentBillingProfileApplicationInteractor';
 
 class StudentBillingProfileCommandsController {
   @withErrorHandler
   static async create(request: Request, response: Response): Promise<void> {
-    const { studentId, address, city, country, phone } = request.body;
+    const { studentId, identityDocument, address, phone } = request.body;
 
     const studentBillingProfile = await studentBillingProfileApplicationInteractor.create({
       studentId,
+      identityDocument,
       address,
-      city,
-      country,
       phone,
     });
 

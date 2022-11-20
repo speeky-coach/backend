@@ -1,3 +1,5 @@
+import StudentBillingProfile from './StudentBillingProfile';
+
 export type ProviderBillingProfileId = string;
 
 export interface ProviderBillingProfile {
@@ -8,11 +10,7 @@ export type CreateInput = {
   name: string;
   lastname: string;
   email: string;
-  address: string;
-  city: string;
-  country: string;
-  phone: string;
-};
+} & Pick<StudentBillingProfile, 'identityDocument' | 'address' | 'phone'>;
 
 interface ProviderBillingProfileService {
   create(input: CreateInput): Promise<ProviderBillingProfile>;

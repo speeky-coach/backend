@@ -3,7 +3,7 @@ import StudentBillingProfile from './StudentBillingProfile';
 
 export type AddInput = Pick<
   StudentBillingProfile,
-  'studentId' | 'providerBillingProfileId' | 'address' | 'city' | 'country' | 'phone'
+  'studentId' | 'providerBillingProfileId' | 'identityDocument' | 'address' | 'phone'
 >;
 
 interface StudentBillingProfileRepository {

@@ -6,10 +6,24 @@ interface StudentBillingProfile {
   id: StudentBillingProfileId;
   studentId: StudentId;
   providerBillingProfileId: string;
-  address: string;
-  city: string;
-  country: string;
-  phone: string;
+  identityDocument: {
+    type: string;
+    number: string;
+  };
+  address: {
+    street: string;
+    number: string;
+    floor: string;
+    apartment: string;
+    city: string;
+    country: string;
+    zipCode: string;
+  };
+  phone: {
+    countryCode: string;
+    areaCode: string;
+    number: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
