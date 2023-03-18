@@ -66,11 +66,9 @@ class ExpressApp {
   }
 
   public listen(): void {
-    if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'test.local') {
-      this.app.listen(process.env.PORT, () => {
-        logger.info(`Express App Connected [port ${process.env.PORT}]`);
-      });
-    }
+    this.app.listen(process.env.PORT, () => {
+      logger.info(`Express App Connected [port ${process.env.PORT}]`);
+    });
   }
 
   public async runServices(services: Promise<any>[]): Promise<void> {

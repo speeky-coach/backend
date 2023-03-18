@@ -8,4 +8,5 @@ router.use(MODULE_ROUTE, conversationsModule.router);
 
 export default {
   router,
+  listeners: [...conversationsModule.listeners],
 };

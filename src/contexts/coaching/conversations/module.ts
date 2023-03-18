@@ -1,6 +1,7 @@
 import router from './router';
-import './subscriber';
+import listeners from './listeners';
 
 export default {
   router,
+  listeners,
 };
