@@ -1,14 +1,15 @@
 import { Socket } from 'socket.io';
+import fs, { WriteStream } from 'fs';
 import { SocketListener } from '../../../framework';
 
 interface NewConversationPayload {
   userId: string;
   conversationId: string;
   status: 'started' | 'in-progress' | 'stopped';
-  data: Blob;
+  data: ArrayBuffer;
 }
 
-const conversationStreams: Map<string, Blob[]> = new Map();
+const conversationStreams: Map<string, WriteStream> = new Map();
 
 const newConversationStartedHandler: SocketListener = {
   event: 'new-conversation-started',
@@ -16,7 +17,9 @@ const newConversationStartedHandler: SocketListener = {
     console.log('new-conversation-started');
     const { userId, conversationId } = payload;
 
-    conversationStreams.set(conversationId, []);
+    const fileStream = fs.createWriteStream('./' + conversationId + '.webm');
+
+    conversationStreams.set(conversationId, fileStream);
   },
 };
 
@@ -27,13 +30,13 @@ const newConversationInProgressHandler: SocketListener = {
     const { userId, conversationId, data } = payload;
     console.log('data:', data);
 
-    const buffer = conversationStreams.get(conversationId);
+    const fileStream = conversationStreams.get(conversationId);
 
-    if (!buffer) {
+    if (!fileStream) {
       return;
     }
 
-    conversationStreams.set(conversationId, [...buffer, data]);
+    fileStream.write(Buffer.from(data));
   },
 };
 
@@ -43,8 +46,14 @@ const newConversationStoppedHandler: SocketListener = {
     console.log('new-conversation-stopped');
     const { userId, conversationId } = payload;
 
-    const buffer = conversationStreams.get(conversationId);
-    console.log('buffer:', buffer);
+    const fileStream = conversationStreams.get(conversationId);
+    console.log('fileStream:', fileStream);
+
+    if (!fileStream) {
+      return;
+    }
+
+    fileStream.end();
 
     conversationStreams.delete(conversationId);
   },
