@@ -1,15 +1,40 @@
 import { Socket } from 'socket.io';
 import fs, { WriteStream } from 'fs';
+import { Writable } from 'stream';
+import { Bucket, Storage } from '@google-cloud/storage';
+import speech, { protos } from '@google-cloud/speech';
 import { SocketListener } from '../../../framework';
+import { StreamingRecognitionConfig, StreamingRecognizeResponse } from './types';
+
+const storage = new Storage();
+const bucket = storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET!);
+
+const client = new speech.SpeechClient();
+
+const request: StreamingRecognitionConfig = {
+  config: {
+    encoding: 'WEBM_OPUS',
+    sampleRateHertz: 48000,
+    languageCode: 'en-US',
+    enableAutomaticPunctuation: true,
+  },
+  interimResults: true, // Enable interim results for real-time transcription
+  singleUtterance: false, // Do not stop after the first utterance
+};
 
 interface NewConversationPayload {
   userId: string;
   conversationId: string;
-  status: 'started' | 'in-progress' | 'stopped';
   data: ArrayBuffer;
 }
 
-const conversationStreams: Map<string, WriteStream> = new Map();
+interface StreamSession {
+  fileStream: Writable;
+  recognizeStream: Writable;
+}
+
+const streamSessions: Map<string, StreamSession> = new Map();
+const resultArray: any[] = [];
 
 const newConversationStartedHandler: SocketListener = {
   event: 'new-conversation-started',
@@ -17,9 +42,36 @@ const newConversationStartedHandler: SocketListener = {
     console.log('new-conversation-started');
     const { userId, conversationId } = payload;
 
-    const fileStream = fs.createWriteStream('./' + conversationId + '.webm');
+    const pathFile = `audio_test.webm`;
+    const file = bucket.file(pathFile);
+    const fileStream = file.createWriteStream();
 
-    conversationStreams.set(conversationId, fileStream);
+    const recognizeStream = client
+      .streamingRecognize(request)
+      .on('error', console.error)
+      .on('data', (data: StreamingRecognizeResponse) => {
+        resultArray.push(data);
+        const result = data.results[0];
+        if (result.isFinal) {
+          // save resultArray as json file at ./data/resultArray.json
+          // with indent 2
+          fs.writeFileSync('./data/resultArray.json', JSON.stringify(resultArray, null, 2));
+
+          const transcript = result.alternatives![0].transcript;
+          // console.log(`Final transcript: ${transcript}`);
+        } else {
+          const interimTranscript = result.alternatives![0].transcript;
+          // console.log(`Interim transcript: ${interimTranscript}`);
+          // socket.emit('transcript', interimTranscript);
+        }
+      });
+
+    const streamSession = {
+      fileStream,
+      recognizeStream,
+    };
+
+    streamSessions.set(conversationId, streamSession);
   },
 };
 
@@ -30,13 +82,18 @@ const newConversationInProgressHandler: SocketListener = {
     const { userId, conversationId, data } = payload;
     console.log('data:', data);
 
-    const fileStream = conversationStreams.get(conversationId);
+    const streamSession = streamSessions.get(conversationId);
 
-    if (!fileStream) {
+    if (!streamSession) {
       return;
     }
 
-    fileStream.write(Buffer.from(data));
+    const { fileStream, recognizeStream } = streamSession;
+
+    const buffer = Buffer.from(data);
+
+    fileStream.write(buffer);
+    recognizeStream.write(data);
   },
 };
 
@@ -46,16 +103,18 @@ const newConversationStoppedHandler: SocketListener = {
     console.log('new-conversation-stopped');
     const { userId, conversationId } = payload;
 
-    const fileStream = conversationStreams.get(conversationId);
-    console.log('fileStream:', fileStream);
+    const streamSession = streamSessions.get(conversationId);
 
-    if (!fileStream) {
+    if (!streamSession) {
       return;
     }
 
-    fileStream.end();
+    const { fileStream, recognizeStream } = streamSession;
 
-    conversationStreams.delete(conversationId);
+    fileStream.end();
+    recognizeStream.end();
+
+    streamSessions.delete(conversationId);
   },
 };
 
