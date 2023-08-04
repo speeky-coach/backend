@@ -51,7 +51,7 @@ const newConversationStartedHandler: SocketListener = {
 
     const { userId, conversationUuid } = payload;
 
-    const pathFile = `audios/${userId}/${conversationUuid}.webm`;
+    const pathFile = `users/${userId}/audios/${conversationUuid}.webm`;
     const file = bucket.file(pathFile);
     const fileStream = file.createWriteStream();
 
