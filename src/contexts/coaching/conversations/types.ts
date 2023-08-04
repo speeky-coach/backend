@@ -4,6 +4,8 @@ export type StreamingRecognitionConfig = protos.google.cloud.speech.v1.IStreamin
 
 export type StreamingRecognizeResponse = protos.google.cloud.speech.v1.StreamingRecognizeResponse;
 
+export type SpeechRecognitionAlternative = protos.google.cloud.speech.v1.ISpeechRecognitionAlternative;
+
 /* export interface SpeechRecognitionData {
   results: protos.google.cloud.speech.v1.IStreamingRecognitionResult[];
   speechAdaptationInfo: protos.google.cloud.speech.v1.ISpeechAdaptationInfo;

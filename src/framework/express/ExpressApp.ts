@@ -21,11 +21,8 @@ class ExpressApp {
 
   constructor(version: string, middlewares: ExpressMiddleware[] = [], routers: Express.Router[]) {
     this.app = Express();
-
     this.version = version;
-
     this.loadMiddleware(middlewares);
-
     this.loadRouters(routers);
   }
 

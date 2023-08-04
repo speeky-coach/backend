@@ -21,16 +21,20 @@ class SocketApp {
       serveClient: false,
       cors: {
         origin: '*',
-        // methods: ['GET', 'POST'],
-        // credentials: false,
       },
     });
     this.listeners = listeners.reduce((acc, val) => acc.concat(val), []);
+    this.loadListeners();
+    // set header in the response
+    /* this.io.use((socket, next) => {
+      socket.handshake.headers['x-service-version'] = process.env.VERSION;
+      next();
+    }); */
   }
 
   private loadListeners(): void {
     this.io.on('connection', (socket: Socket) => {
-      console.log('a user connected');
+      logger.info(`New connection with socket id: ${socket.id}`);
 
       this.listeners.forEach((listener) => {
         socket.on(listener.event, (data: any) => {
@@ -48,7 +52,7 @@ class SocketApp {
 
   public async start(services: Promise<any>[]): Promise<void> {
     await this.expressApp.runServices(services);
-    this.loadListeners();
+
     this.listen();
   }
 }
