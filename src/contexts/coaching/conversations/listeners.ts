@@ -58,10 +58,13 @@ const newConversationStartedHandler: SocketListener = {
     const conversationRef = await firestoreDb.collection(COLLECTION_NAME).add({
       userId,
       uuid: conversationUuid,
+      userLabels: [],
       paragraphs: [],
     });
 
     const { id: conversationId } = conversationRef;
+
+    socket.emit('conversation-id-assigned', { conversationUuid, id: conversationId });
 
     const recognizeStream = client
       .streamingRecognize(request)
