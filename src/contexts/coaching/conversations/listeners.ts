@@ -60,6 +60,7 @@ const newConversationStartedHandler: SocketListener = {
       uuid: conversationUuid,
       userLabels: [],
       paragraphs: [],
+      createdAt: new Date(),
     });
 
     const { id: conversationId } = conversationRef;
