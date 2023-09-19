@@ -41,6 +41,11 @@ function parseTimePosition(time: { nanos?: number | null; seconds?: number | Lon
 
 export function getParagraphs(alternative: SpeechRecognitionAlternative): Paragraph[] {
   const paragraphs: Paragraph[] = [];
+
+  if (alternative.words && alternative.words.length === 0) {
+    return paragraphs;
+  }
+
   let speakerLabel = alternative.words![0].speakerTag!.toString();
 
   let paragraph: Paragraph = {

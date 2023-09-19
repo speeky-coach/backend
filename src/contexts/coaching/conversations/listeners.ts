@@ -51,10 +51,6 @@ const newConversationStartedHandler: SocketListener = {
 
     const { userId, conversationUuid } = payload;
 
-    const pathFile = `users/${userId}/audios/${conversationUuid}.webm`;
-    const file = bucket.file(pathFile);
-    const fileStream = file.createWriteStream();
-
     const conversationRef = await firestoreDb.collection(COLLECTION_NAME).add({
       userId,
       uuid: conversationUuid,
@@ -64,6 +60,16 @@ const newConversationStartedHandler: SocketListener = {
     });
 
     const { id: conversationId } = conversationRef;
+
+    const pathFile = `audios/${userId}/${conversationId}.webm`;
+    const file = bucket.file(pathFile);
+    // await file.makePublic();
+    const fileStream = file.createWriteStream();
+    fileStream.on('finish', () => {
+      console.log(`File ${pathFile} uploaded.`);
+
+      socket.emit('conversation-audio-uploaded', { conversationUuid, id: conversationId });
+    });
 
     socket.emit('conversation-id-assigned', { conversationUuid, id: conversationId });
 
