@@ -3,3 +3,4 @@ export * from './express';
 export * from './firebase';
 export * from './infrastructure';
 export * from './logger';
+export * from './socket';
