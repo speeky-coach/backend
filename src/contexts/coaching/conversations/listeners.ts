@@ -103,7 +103,7 @@ const newConversationStartedHandler: SocketListener = {
           socket.emit('paragraphs-transcripted', { conversationUuid, paragraphs });
 
           // save paragraphs to database
-          await firestoreDb.runTransaction(async (transaction) => {
+          /* await firestoreDb.runTransaction(async (transaction) => {
             // const conversationRef = firestoreDb.collection(COLLECTION_NAME).doc(conversationId);
             const conversation = await transaction.get(conversationRef);
             const { paragraphs: oldParagraphs } = conversation.data()!;
@@ -111,7 +111,7 @@ const newConversationStartedHandler: SocketListener = {
             const newParagraphs = [...oldParagraphs, ...paragraphs];
 
             transaction.update(conversationRef, { paragraphs: newParagraphs });
-          });
+          }); */
         }
 
         /* if (result.isFinal) {
