@@ -11,6 +11,9 @@
   },
   "author": "Bruce Grover Lee",
   "license": "ISC",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@google-cloud/speech": "^5.4.0",
     "@google-cloud/storage": "^6.9.4",

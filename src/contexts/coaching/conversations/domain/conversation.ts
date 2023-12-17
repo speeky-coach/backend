@@ -26,9 +26,9 @@ function parseTimePosition(time: { nanos?: number | null; seconds?: number | Lon
   const nanos = time.nanos || 0;
   const seconds = time.seconds || 0;
 
-  const hour = typeof seconds === 'number' ? Math.floor(Number(seconds) / 3600) : 0;
-  const minute = typeof seconds === 'number' ? Math.floor((Number(seconds) - hour * 3600) / 60) : 0;
-  const second = typeof seconds === 'number' ? Number(seconds) - hour * 3600 - minute * 60 : 0;
+  const hour = Math.floor(Number(seconds) / 3600);
+  const minute = Math.floor((Number(seconds) - hour * 3600) / 60);
+  const second = Number(seconds) - hour * 3600 - minute * 60;
   const millisecond = nanos / 1000000;
 
   return {

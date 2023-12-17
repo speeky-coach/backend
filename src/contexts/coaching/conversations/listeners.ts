@@ -86,14 +86,14 @@ const newConversationStartedHandler: SocketListener = {
 
         if (alternatives) {
           const { transcript } = alternatives[0];
-          console.log('transcript:', transcript);
+          // console.log('transcript:', transcript);
           socket.emit('incoming-message-transcripted', { conversationUuid, incomingMessage: transcript });
         }
 
         if (alternatives && isFinal) {
-          console.log('isFinal:', isFinal);
+          // console.log('isFinal:', isFinal);
           const { transcript } = alternatives[0];
-          console.log('transcript:', transcript);
+          // console.log('transcript:', transcript);
           // fs.writeFileSync(`./data/${conversationUuid}.json`, JSON.stringify(resultArray, null, 2));
 
           // get paragraphs from result
@@ -145,7 +145,7 @@ const newConversationInProgressHandler: SocketListener = {
     // console.log(JSON.stringify(resultArray));
 
     const { userId, conversationUuid, data } = payload;
-    console.log('data:', data);
+    // console.log('data:', data);
 
     const streamSession = streamSessions.get(conversationUuid);
 
