@@ -8,6 +8,7 @@ import { StreamingRecognitionConfig, StreamingRecognizeResponse } from './types'
 import { getParagraphs } from './domain/conversation';
 
 const COLLECTION_NAME = 'conversations';
+const RECOGNIZE_STREAM_TIME_LIMIT = 0.5; // in minutes
 
 const storage = new Storage();
 const bucket = storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET!);
@@ -37,17 +38,50 @@ interface NewConversationPayload {
 interface StreamSession {
   fileStream: Writable;
   recognizeStream: Writable;
+  recognizeStreamTimeLimit: Date;
   conversationId: string;
 }
 
 const streamSessions: Map<string, StreamSession> = new Map();
-let resultArray: any[] = [];
+
+function handleRecognizeStreamData(socket: Socket, conversationUuid: string) {
+  console.log('handleRecognizeStreamData');
+  console.log('conversationUuid', conversationUuid);
+  console.log('socket', socket);
+
+  return async function (data: StreamingRecognizeResponse) {
+    console.log('on streamingRecognize data');
+
+    const result = data.results[0];
+    const { isFinal, alternatives } = result;
+
+    if (alternatives) {
+      const { transcript } = alternatives[0];
+
+      socket.emit('incoming-message-transcripted', { conversationUuid, incomingMessage: transcript });
+    }
+
+    if (alternatives && isFinal) {
+      const paragraphs = getParagraphs(alternatives[0]);
+
+      socket.emit('paragraphs-transcripted', { conversationUuid, paragraphs });
+    }
+  };
+}
+
+function buildRecognizeStream(socket: Socket, conversationUuid: string) {
+  const recognizeStream = client
+    .streamingRecognize(request)
+    .on('error', console.error)
+    .on('data', handleRecognizeStreamData(socket, conversationUuid));
+
+  return recognizeStream;
+}
 
 const newConversationStartedHandler: SocketListener = {
   event: 'new-conversation-started',
   callback: async (socket: Socket, payload: Omit<NewConversationPayload, 'data'>) => {
     console.log('new-conversation-started');
-    console.log(JSON.stringify(resultArray));
 
     const { userId, conversationUuid } = payload;
 
@@ -73,64 +107,12 @@ const newConversationStartedHandler: SocketListener = {
 
     socket.emit('conversation-id-assigned', { conversationUuid, id: conversationId });
 
-    const recognizeStream = client
-      .streamingRecognize(request)
-      .on('error', console.error)
-      .on('data', async (data: StreamingRecognizeResponse) => {
-        console.log('on streamingRecognize data');
-        // resultArray.push(data);
-        // console.log(JSON.stringify(resultArray));
-
-        const result = data.results[0];
-        const { isFinal, alternatives } = result;
-
-        if (alternatives) {
-          const { transcript } = alternatives[0];
-          // console.log('transcript:', transcript);
-          socket.emit('incoming-message-transcripted', { conversationUuid, incomingMessage: transcript });
-        }
-
-        if (alternatives && isFinal) {
-          // console.log('isFinal:', isFinal);
-          const { transcript } = alternatives[0];
-          // console.log('transcript:', transcript);
-          // fs.writeFileSync(`./data/${conversationUuid}.json`, JSON.stringify(resultArray, null, 2));
-
-          // get paragraphs from result
-          const paragraphs = getParagraphs(alternatives[0]);
-
-          // emit new paragraphs to client
-          socket.emit('paragraphs-transcripted', { conversationUuid, paragraphs });
-
-          // save paragraphs to database
-          /* await firestoreDb.runTransaction(async (transaction) => {
-            // const conversationRef = firestoreDb.collection(COLLECTION_NAME).doc(conversationId);
-            const conversation = await transaction.get(conversationRef);
-            const { paragraphs: oldParagraphs } = conversation.data()!;
-
-            const newParagraphs = [...oldParagraphs, ...paragraphs];
-
-            transaction.update(conversationRef, { paragraphs: newParagraphs });
-          }); */
-        }
-
-        /* if (result.isFinal) {
-          // save resultArray as json file at ./data/resultArray.json
-          // with indent 2
-          fs.writeFileSync(`./data/${conversationUuid}.json`, JSON.stringify(resultArray, null, 2));
-
-          const transcript = result.alternatives![0].transcript;
-          // console.log(`Final transcript: ${transcript}`);
-        } else {
-          const interimTranscript = result.alternatives![0].transcript;
-          // console.log(`Interim transcript: ${interimTranscript}`);
-          // socket.emit('transcript', interimTranscript);
-        } */
-      });
+    const recognizeStream = buildRecognizeStream(socket, conversationUuid);
 
     const streamSession = {
       fileStream,
       recognizeStream,
+      recognizeStreamTimeLimit: new Date(Date.now() + RECOGNIZE_STREAM_TIME_LIMIT * 60000),
       conversationId,
     };
 
@@ -142,10 +124,8 @@ const newConversationInProgressHandler: SocketListener = {
   event: 'new-conversation-in-progress',
   callback: (socket: Socket, payload: NewConversationPayload) => {
     console.log('new-conversation-in-progress');
-    // console.log(JSON.stringify(resultArray));
 
-    const { userId, conversationUuid, data } = payload;
-    // console.log('data:', data);
+    const { conversationUuid, data } = payload;
 
     const streamSession = streamSessions.get(conversationUuid);
 
@@ -153,14 +133,30 @@ const newConversationInProgressHandler: SocketListener = {
       return;
     }
 
-    const { fileStream, recognizeStream } = streamSession;
+    const { fileStream, recognizeStream, recognizeStreamTimeLimit } = streamSession;
+    let temporalRecognizeStream = recognizeStream;
+    let temporalRecognizeStreamTimeLimit = recognizeStreamTimeLimit;
+
+    if (temporalRecognizeStreamTimeLimit < new Date()) {
+      // when the time limit is reached, we create a new recognizeStream restarting the process
+      console.log('The RecognizeStream time limit is reached, we create a new recognizeStream restarting the process');
+      temporalRecognizeStream.end();
+
+      temporalRecognizeStream = buildRecognizeStream(socket, conversationUuid);
+      temporalRecognizeStreamTimeLimit = new Date(Date.now() + RECOGNIZE_STREAM_TIME_LIMIT * 60000);
+    }
 
     const buffer = Buffer.from(data);
 
     fileStream.write(buffer);
-    recognizeStream.write(data);
+    temporalRecognizeStream.write(data);
 
-    streamSessions.set(conversationUuid, { ...streamSession, fileStream, recognizeStream });
+    streamSessions.set(conversationUuid, {
+      ...streamSession,
+      fileStream,
+      recognizeStream: temporalRecognizeStream,
+      recognizeStreamTimeLimit: temporalRecognizeStreamTimeLimit,
+    });
   },
 };
 
@@ -182,8 +178,6 @@ const newConversationStoppedHandler: SocketListener = {
     recognizeStream.end();
 
     streamSessions.delete(conversationUuid);
-
-    resultArray = [];
   },
 };
 
