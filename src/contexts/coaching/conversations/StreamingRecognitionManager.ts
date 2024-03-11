@@ -11,8 +11,8 @@ const streamingLimit = 10_000;
 const request: StreamingRecognitionConfig = {
   config: {
     enableWordTimeOffsets: true,
-    encoding: 'WEBM_OPUS',
-    sampleRateHertz: 48000,
+    encoding: 'LINEAR16',
+    sampleRateHertz: 16000,
     languageCode: 'en-US',
     enableAutomaticPunctuation: true,
     // https://cloud.google.com/speech-to-text/docs/multiple-voices

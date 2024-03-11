@@ -40,7 +40,7 @@ const newConversationStartedHandler: SocketListener = {
 
     const { id: conversationId } = conversationRef;
 
-    const pathFile = `audios/${userId}/${conversationId}.webm`;
+    const pathFile = `audios/${userId}/${conversationId}.wav`;
     const file = bucket.file(pathFile);
     // await file.makePublic();
     const fileStream = file.createWriteStream();
